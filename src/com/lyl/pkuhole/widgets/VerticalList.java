@@ -108,7 +108,6 @@ public class VerticalList extends JPanel implements Scrollable {
 			};
 			listeners.add(listener);
 			component.addMouseListener(listener);
-			component.setFocusable(false);
 			itemCount++;
 			return true;
 		} else

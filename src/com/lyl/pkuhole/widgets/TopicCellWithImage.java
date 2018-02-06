@@ -44,7 +44,6 @@ public class TopicCellWithImage extends JPanel implements VerticalList.ListItemL
 		text = new JTextArea();
 		text.setEditable(false);
 		text.setLineWrap(true);
-		text.setFocusable(false);
 		text.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
