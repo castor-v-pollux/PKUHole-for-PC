@@ -38,7 +38,7 @@ public class Topic extends Observable {
 
 	/*
 	 * When a topic is image type, url is the image url and extra is the image size;
-	 * When a topic is
+	 * When a topic is audio type, url is the audio url and extra is the (audio size?)
 	 */
 	public String url;
 

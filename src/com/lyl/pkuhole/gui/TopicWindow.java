@@ -213,14 +213,6 @@ public class TopicWindow extends JFrame implements Observer {
 		}
 	}
 
-	/**
-	 * boolean selected = attention.isSelected(); if (!setAttention(selected)) {
-	 * attention.setSelected(!selected); }
-	 * 
-	 * @param attention
-	 * @return
-	 */
-
 	private void setAttention() {
 		boolean selected = attention.isSelected();
 		User user = PKUHole.getInstance().user;
