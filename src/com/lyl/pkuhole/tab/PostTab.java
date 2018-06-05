@@ -10,7 +10,6 @@ import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URLEncoder;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -27,13 +26,14 @@ import javax.swing.filechooser.FileFilter;
 import org.apache.http.util.TextUtils;
 
 import com.lyl.pkuhole.PKUHole;
-import com.lyl.pkuhole.PKUHoleAPI;
 import com.lyl.pkuhole.exception.PKUHoleException;
 import com.lyl.pkuhole.model.AttentionManager;
-import com.lyl.pkuhole.model.Topic;
 import com.lyl.pkuhole.model.User;
+import com.lyl.pkuhole.network.Network;
 import com.lyl.pkuhole.utils.BASE64Utils;
 import com.lyl.pkuhole.utils.UIUtils;
+
+import io.reactivex.schedulers.Schedulers;
 
 public class PostTab extends JPanel {
 
@@ -148,29 +148,37 @@ public class PostTab extends JPanel {
 				UIUtils.messageBox("请输入内容或选择图片！");
 				return;
 			}
-			if (image == null) {
+			if (image == null)
 				// 文字树洞
+				Network.sendTextPost(user.token, content)
+						.observeOn(Schedulers.io())
+						.subscribe(pid -> {
+							reset();
+							Network.getSingleTopic(pid)
+									.observeOn(Schedulers.io())
+									.subscribe(topic -> {
+										AttentionManager.addAttentionTopic(topic);
+										UIUtils.messageBox("发表成功！树洞号为" + pid);
+									}, err -> {
+									});
+						}, err -> {
+							UIUtils.messageBox("发表失败！原因：" + err.getMessage());
+						});
+			else
 				try {
-					int pid = PKUHoleAPI.sendTextPost(user.token, content);
-					reset();
-					Topic topic = PKUHoleAPI.getSingleTopic(pid);
-					AttentionManager.addAttentionTopic(topic);
-					UIUtils.messageBox("发表成功！树洞号为" + pid);
+					Network.sendImagePost(user.token, content, BASE64Utils.imageToString(image))
+							.observeOn(Schedulers.io())
+							.subscribe(pid -> {
+								// 发表图片树洞后服务器不会自动关注(垃圾服务器)
+								UIUtils.messageBox("发表成功！由于服务器问题，发表图片树洞不会自动关注，请打开树洞详情页手动关注");
+								reset();
+							}, err -> {
+								UIUtils.messageBox("发表失败！原因：" + err.getMessage());
+							});
 				} catch (PKUHoleException err) {
 					UIUtils.messageBox("发表失败！原因：" + err.getMessage());
 				}
-			} else {
-				// 图片树洞
-				try {
-					// 需要先BASE64编码，再URLEncode(垃圾协议，URLEncode完全可以省略)
-					PKUHoleAPI.sendImagePost(user.token, content, URLEncoder.encode(BASE64Utils.imageToString(image)));
-					// 发表图片树洞后服务器不会自动关注(垃圾服务器)
-					UIUtils.messageBox("发表成功！由于服务器问题，发表图片树洞不会自动关注，请打开树洞详情页手动关注");
-					reset();
-				} catch (PKUHoleException err) {
-					UIUtils.messageBox("发表失败！原因：" + err.getMessage());
-				}
-			}
+
 		});
 		addPic.addActionListener(e -> {
 			chooseImage();

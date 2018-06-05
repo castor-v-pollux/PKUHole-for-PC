@@ -22,4 +22,17 @@ public class User {
 		return String.format("当前用户：\n学号：\t%d\n姓名：\t%s\n院系：\t%s", id, name, department);
 	}
 
+	public static class Inner extends User {
+		private int code;
+		private String msg;
+
+		public boolean success() {
+			return code == 0;
+		}
+
+		public String getErrorMsg() {
+			return msg;
+		}
+	}
+
 }

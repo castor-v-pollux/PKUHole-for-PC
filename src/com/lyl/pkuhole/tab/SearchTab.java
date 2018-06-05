@@ -15,11 +15,12 @@ import javax.swing.ScrollPaneConstants;
 
 import org.apache.http.util.TextUtils;
 
-import com.lyl.pkuhole.PKUHoleAPI;
-import com.lyl.pkuhole.exception.PKUHoleException;
 import com.lyl.pkuhole.model.Topic;
+import com.lyl.pkuhole.network.Network;
 import com.lyl.pkuhole.utils.UIUtils;
 import com.lyl.pkuhole.widgets.VerticalList;
+
+import io.reactivex.schedulers.Schedulers;
 
 public class SearchTab extends JPanel {
 
@@ -107,39 +108,45 @@ public class SearchTab extends JPanel {
 	}
 
 	private void searchByText(String s) {
-		try {
-			Topic[] topics = PKUHoleAPI.searchTopics(s, MAX_PAGE_SIZE);
-			if (topics == null || topics.length == 0) {
-				UIUtils.messageBox("无搜索结果！");
-				return;
-			}
-			topicList.removeAll();
-			for (Topic topic : topics)
-				topicList.addItem(topic.getCell(true));
-			topicList.commit();
-			if (topics.length == MAX_PAGE_SIZE)
-				UIUtils.messageBox("搜索结果过多！只显示最近100条。");
-		} catch (PKUHoleException e) {
-			UIUtils.messageBox("搜索失败！原因：" + e.getMessage());
-		}
+		Network.searchTopics(s, MAX_PAGE_SIZE)
+				.observeOn(Schedulers.io())
+				.subscribe(topics -> {
+					if (topics == null || topics.length == 0) {
+						UIUtils.messageBox("无搜索结果！");
+						return;
+					}
+					topicList.removeAll();
+					for (Topic topic : topics)
+						topicList.addItem(topic.getCell(true));
+					topicList.commit();
+					if (topics.length == MAX_PAGE_SIZE)
+						UIUtils.messageBox("搜索结果过多！只显示最近100条。");
+				}, err -> {
+					UIUtils.messageBox("搜索失败！原因：" + err.getMessage());
+				});
 	}
 
 	private void searchByPid(String s) {
+		int pid;
 		try {
-			int pid = Integer.parseInt(s);
-			Topic topic = PKUHoleAPI.getSingleTopic(pid);
-			if (topic == null) {
-				UIUtils.messageBox("无搜索结果！");
-				return;
-			}
-			topicList.removeAll();
-			topicList.addItem(topic.getCell(true));
-			topicList.commit();
+			pid = Integer.parseInt(s);
 		} catch (NumberFormatException e) {
 			UIUtils.messageBox("请输入数字！");
-		} catch (PKUHoleException e) {
-			UIUtils.messageBox("搜索失败！原因：" + e.getMessage());
+			return;
 		}
+		Network.getSingleTopic(pid)
+				.observeOn(Schedulers.io())
+				.subscribe(topic -> {
+					if (topic == null) {
+						UIUtils.messageBox("无搜索结果！");
+						return;
+					}
+					topicList.removeAll();
+					topicList.addItem(topic.getCell(true));
+					topicList.commit();
+				}, err -> {
+					UIUtils.messageBox("搜索失败！原因：" + err.getMessage());
+				});
 	}
 
 }

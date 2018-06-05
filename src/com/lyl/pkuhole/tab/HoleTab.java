@@ -14,11 +14,12 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 
-import com.lyl.pkuhole.PKUHoleAPI;
-import com.lyl.pkuhole.exception.PKUHoleException;
 import com.lyl.pkuhole.model.Topic;
+import com.lyl.pkuhole.network.Network;
 import com.lyl.pkuhole.utils.UIUtils;
 import com.lyl.pkuhole.widgets.VerticalList;
+
+import io.reactivex.schedulers.Schedulers;
 
 public class HoleTab extends JPanel {
 
@@ -125,36 +126,35 @@ public class HoleTab extends JPanel {
 	private void setPageNum(int newPageNum) {
 		if (newPageNum == pageNum)
 			return;
-		if (loadPage(newPageNum)) {
-			page.setText("第" + newPageNum + "页");
-			if (newPageNum == 1)
-				left.setEnabled(false);
-			else
-				left.setEnabled(true);
-			if (newPageNum == MAX_PAGE_NUM)
-				right.setEnabled(false);
-			else
-				right.setEnabled(true);
-			pageNum = newPageNum;
-		}
+		loadPage(newPageNum);
 	}
 
-	private boolean loadPage(int pageNum) {
-		try {
-			Topic[] topics = PKUHoleAPI.getTopics(pageNum);
-			if (topics == null || topics.length == 0) {
-				UIUtils.messageBox("操作失败，该页面为空！");
-				return false;
-			}
-			topicList.removeAll();
-			for (Topic topic : topics) {
-				topicList.addItem(topic.getCell(true));
-			}
-			topicList.commit();
-		} catch (PKUHoleException e) {
-			UIUtils.messageBox("加载页面失败！原因：" + e.getMessage());
-		}
-		return true;
+	private void loadPage(int pageNum) {
+		Network.getTopics(pageNum)
+		.observeOn(Schedulers.io())
+				.subscribe(topics -> {
+					if (topics == null || topics.length == 0) {
+						UIUtils.messageBox("操作失败，该页面为空！");
+						// return false;
+					}
+					topicList.removeAll();
+					for (Topic topic : topics) {
+						topicList.addItem(topic.getCell(true));
+					}
+					topicList.commit();
+					page.setText("第" + pageNum + "页");
+					if (pageNum == 1)
+						left.setEnabled(false);
+					else
+						left.setEnabled(true);
+					if (pageNum == MAX_PAGE_NUM)
+						right.setEnabled(false);
+					else
+						right.setEnabled(true);
+					HoleTab.this.pageNum = pageNum;
+				}, err -> {
+					UIUtils.messageBox("加载页面失败！原因：" + err.getMessage());
+				});
 	}
 
 }

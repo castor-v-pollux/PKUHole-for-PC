@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.lyl.pkuhole.PKUHole;
-import com.lyl.pkuhole.PKUHoleAPI;
-import com.lyl.pkuhole.exception.PKUHoleException;
-import com.lyl.pkuhole.utils.UIUtils;
+import com.lyl.pkuhole.network.Network;
+
+import io.reactivex.Observable;
 
 /**
  * 管理当前用户所有关注的树洞列表。
@@ -26,24 +26,19 @@ public class AttentionManager {
 	 */
 	public static List<Topic> topicList;
 
-	public static void getAttentionList() {
+	public static Observable<Topic[]> getAttentionList() {
 		User user = PKUHole.getInstance().user;
 		if (user == null) {
 			// This could never happen.
-			return;
+			return null;
 		}
 		String token = user.token;
-		Topic[] topics;
-		try {
-			topics = PKUHoleAPI.getAttentionTopics(token);
-		} catch (PKUHoleException e) {
-			UIUtils.messageBox("获取关注列表失败！原因：" + e.getMessage() + "\n请重新打开本客户端。");
-			System.exit(0);
-			return;
-		}
-		topicList = new ArrayList<Topic>();
-		for (Topic topic : topics)
-			topicList.add(topic);
+		return Network.getAttentionTopics(token)
+				.doOnNext(topics -> {
+					topicList = new ArrayList<Topic>();
+					for (Topic topic : topics)
+						topicList.add(topic);
+				});
 	}
 
 	public static void clearAttentionList() {

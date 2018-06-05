@@ -15,10 +15,10 @@ import javax.swing.JTextField;
 import org.apache.http.util.TextUtils;
 
 import com.lyl.pkuhole.PKUHole;
-import com.lyl.pkuhole.PKUHoleAPI;
-import com.lyl.pkuhole.exception.PKUHoleException;
-import com.lyl.pkuhole.model.User;
+import com.lyl.pkuhole.network.Network;
 import com.lyl.pkuhole.utils.UIUtils;
+
+import io.reactivex.schedulers.Schedulers;
 
 public class LoginWindow extends JDialog {
 
@@ -103,15 +103,16 @@ public class LoginWindow extends JDialog {
 				UIUtils.messageBox("ÇëÊäÈëÃÜÂë£¡");
 				return;
 			}
-			try {
-				User user = PKUHoleAPI.login(userName, password);
-				user.id = Long.parseLong(userName);
-				PKUHole.getInstance().user = user;
-				PKUHole.getInstance().notifyUserChanged();
-				dispose();
-			} catch (PKUHoleException err) {
-				UIUtils.messageBox("µÇÂ¼Ê§°Ü£¡Ô­Òò£º" + err.getMessage());
-			}
+			Network.login(userName, password)
+					.observeOn(Schedulers.io())
+					.subscribe(user -> {
+						user.id = Long.parseLong(userName);
+						PKUHole.getInstance().user = user;
+						PKUHole.getInstance().notifyUserChanged();
+						dispose();
+					}, err -> {
+						UIUtils.messageBox("µÇÂ¼Ê§°Ü£¡Ô­Òò£º" + err.getMessage());// TODO
+					});
 		});
 		cancel.addActionListener(e -> {
 			dispose();

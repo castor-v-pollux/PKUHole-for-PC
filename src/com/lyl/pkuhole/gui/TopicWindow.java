@@ -22,17 +22,18 @@ import javax.swing.ScrollPaneConstants;
 import org.apache.http.util.TextUtils;
 
 import com.lyl.pkuhole.PKUHole;
-import com.lyl.pkuhole.PKUHoleAPI;
-import com.lyl.pkuhole.exception.PKUHoleException;
 import com.lyl.pkuhole.model.AttentionManager;
 import com.lyl.pkuhole.model.Comment;
 import com.lyl.pkuhole.model.Topic;
 import com.lyl.pkuhole.model.User;
+import com.lyl.pkuhole.network.Network;
 import com.lyl.pkuhole.utils.UIUtils;
 import com.lyl.pkuhole.widgets.CommentCell;
 import com.lyl.pkuhole.widgets.TopicCell;
 import com.lyl.pkuhole.widgets.TopicCellWithImage;
 import com.lyl.pkuhole.widgets.VerticalList;
+
+import io.reactivex.schedulers.Schedulers;
 
 public class TopicWindow extends JFrame implements Observer {
 
@@ -150,46 +151,48 @@ public class TopicWindow extends JFrame implements Observer {
 	}
 
 	private void refreshTopic() {
-		try {
-			Topic newTopic = PKUHoleAPI.getSingleTopic(topic.pid);
-			/**
-			 * Possibilities are that this topic is deleted and getSingleTopic returns null.
-			 * In this case, use the previous version of information and warn the user.
-			 */
-			if (newTopic != null) {
-				topic.likenum = newTopic.likenum;
-				topic.reply = newTopic.reply;
-				if (topicCell instanceof TopicCell) {
-					((TopicCell) topicCell).refresh();
-				} else {
-					((TopicCellWithImage) topicCell).refresh();
-				}
-				attention.setSelected(AttentionManager.isAttention(topic.pid));
-			} else {
-				setTitle("树洞#" + topic.pid + "[警告:本条树洞已被删除！]");
-			}
-			if (topicCell instanceof TopicCell) {
-				((TopicCell) topicCell).refresh();
-			} else {
-				((TopicCellWithImage) topicCell).refresh();
-			}
-		} catch (PKUHoleException e) {
-			UIUtils.messageBox("操作失败，原因：" + e.getMessage());
-		}
+		Network.getSingleTopic(topic.pid)
+				.observeOn(Schedulers.io())
+				.subscribe(newTopic -> {
+					/**
+					 * Possibilities are that this topic is deleted and getSingleTopic returns null.
+					 * In this case, use the previous version of information and warn the user.
+					 */
+					if (newTopic != null) {
+						topic.likenum = newTopic.likenum;
+						topic.reply = newTopic.reply;
+						if (topicCell instanceof TopicCell) {
+							((TopicCell) topicCell).refresh();
+						} else {
+							((TopicCellWithImage) topicCell).refresh();
+						}
+						attention.setSelected(AttentionManager.isAttention(topic.pid));
+					} else {
+						setTitle("树洞#" + topic.pid + "[警告:本条树洞已被删除！]");
+					}
+					if (topicCell instanceof TopicCell) {
+						((TopicCell) topicCell).refresh();
+					} else {
+						((TopicCellWithImage) topicCell).refresh();
+					}
+				}, err -> {
+					UIUtils.messageBox("操作失败，原因：" + err.getMessage());// TODO
+				});
 	}
 
 	private void loadPage() {
-		try {
-			Comment[] comments = PKUHoleAPI.getComments(topic.pid);
-			commentList.removeAll();
-			commentList.addItem(topicCell);
-			for (Comment comment : comments) {
-				commentList.addItem(new CommentCell(comment));
-			}
-			commentList.commit();
-		} catch (PKUHoleException e) {
-			UIUtils.messageBox("发生错误，原因：" + e.getMessage());
-		}
+		Network.getComments(topic.pid)
+				.observeOn(Schedulers.io())
+				.subscribe(comments -> {
+					commentList.removeAll();
+					commentList.addItem(topicCell);
+					for (Comment comment : comments) {
+						commentList.addItem(new CommentCell(comment));
+					}
+					commentList.commit();
+				}, err -> {
+					UIUtils.messageBox("发生错误，原因：" + err.getMessage());// TODO
+				});
 	}
 
 	private void report() {
@@ -205,11 +208,12 @@ public class TopicWindow extends JFrame implements Observer {
 		if (TextUtils.isEmpty(reason)) {
 			UIUtils.messageBox("举报失败：理由不能为空！");
 		} else {
-			try {
-				PKUHoleAPI.report(user.token, topic.pid, reason);
-			} catch (PKUHoleException e) {
-				UIUtils.messageBox("操作失败！原因：" + e.getMessage());
-			}
+			Network.report(user.token, topic.pid, reason)
+					.observeOn(Schedulers.io())
+					.subscribe(obj -> {
+					}, err -> {
+						UIUtils.messageBox("操作失败！原因：" + err.getMessage());
+					});
 		}
 	}
 
@@ -221,19 +225,20 @@ public class TopicWindow extends JFrame implements Observer {
 			UIUtils.messageBox("操作失败，请先登录！");
 			return;
 		}
-		try {
-			PKUHoleAPI.setAttention(user.token, topic.pid, selected);
-			if (selected)
-				AttentionManager.addAttentionTopic(topic);
-			else
-				AttentionManager.removeAttentionTopic(topic.pid);
-		} catch (PKUHoleException e) {
-			UIUtils.messageBox("操作失败，原因：" + e.getMessage());
-			if (e.getMessage().startsWith("已经关注")) {
-				attention.setSelected(true);
-				AttentionManager.addAttentionTopic(topic);
-			}
-		}
+		Network.setAttention(user.token, topic.pid, selected)
+				.observeOn(Schedulers.io())
+				.subscribe(obj -> {
+					if (selected)
+						AttentionManager.addAttentionTopic(topic);
+					else
+						AttentionManager.removeAttentionTopic(topic.pid);
+				}, err -> {
+					UIUtils.messageBox("操作失败，原因：" + err.getMessage());// TODO
+					if (err.getMessage().startsWith("已经关注")) {
+						attention.setSelected(true);
+						AttentionManager.addAttentionTopic(topic);
+					}
+				});
 	}
 
 	public void comment(String name) {
@@ -250,15 +255,16 @@ public class TopicWindow extends JFrame implements Observer {
 			UIUtils.messageBox("请输入内容！");
 			return;
 		}
-		try {
-			PKUHoleAPI.sendComment(user.token, topic.pid, content);
-			refreshTopic();
-			loadPage();
-			attention.setSelected(true);
-			AttentionManager.addAttentionTopic(topic);
-		} catch (PKUHoleException e) {
-			UIUtils.messageBox("评论失败！原因：" + e.getMessage());
-		}
+		Network.sendComment(user.token, topic.pid, content)
+				.observeOn(Schedulers.io())
+				.subscribe(pid -> {
+					refreshTopic();
+					loadPage();
+					attention.setSelected(true);
+					AttentionManager.addAttentionTopic(topic);
+				}, err -> {
+					UIUtils.messageBox("评论失败！原因：" + err.getMessage());// TODO
+				});
 
 	}
 

@@ -13,7 +13,6 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
-import com.lyl.pkuhole.PKUHoleAPI;
 import com.lyl.pkuhole.utils.TimeUtils;
 import com.lyl.pkuhole.utils.UIUtils;
 import com.lyl.pkuhole.widgets.TopicCell;
@@ -75,7 +74,7 @@ public class Topic extends Observable {
 			public void run() {
 				URL url;
 				try {
-					url = new URL("http://" + PKUHoleAPI.PKU_HOLE_HOST + PKUHoleAPI.PKU_HOLE_PIC_PATH + Topic.this.url);
+					url = new URL("http://www.pkuhelper.com/services/pkuhole/images/" + Topic.this.url);
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 					return;
