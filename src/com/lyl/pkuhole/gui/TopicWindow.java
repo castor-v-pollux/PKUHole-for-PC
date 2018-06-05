@@ -31,7 +31,7 @@ import com.lyl.pkuhole.utils.UIUtils;
 import com.lyl.pkuhole.widgets.CommentCell;
 import com.lyl.pkuhole.widgets.TopicCell;
 import com.lyl.pkuhole.widgets.TopicCellWithImage;
-import com.lyl.pkuhole.widgets.VerticalList;
+import com.lyl.pkuhole.widgets.JVerticalList;
 
 import io.reactivex.schedulers.Schedulers;
 
@@ -47,7 +47,7 @@ public class TopicWindow extends JFrame implements Observer {
 	// TopicCell
 	private JComponent topicCell;
 	// VerticalList for comments
-	private VerticalList commentList;
+	private JVerticalList commentList;
 	private JScrollPane scrollPane;
 
 	public TopicWindow(Topic topic) {
@@ -84,7 +84,7 @@ public class TopicWindow extends JFrame implements Observer {
 			attention.setSelected(AttentionManager.isAttention(topic.pid));
 
 		topicCell = topic.getCell(false);
-		commentList = new VerticalList();
+		commentList = new JVerticalList();
 	}
 
 	private void initLayout() {

@@ -19,7 +19,7 @@ import com.lyl.pkuhole.gui.ImageWindow;
 import com.lyl.pkuhole.gui.TopicWindow;
 import com.lyl.pkuhole.model.Topic;
 
-public class TopicCellWithImage extends JPanel implements VerticalList.ListItemListener, Observer {
+public class TopicCellWithImage extends JPanel implements JVerticalList.ListItemListener, Observer {
 
 	private static final Font BorderTitleFont = new Font(Font.SANS_SERIF, Font.BOLD, 20);
 

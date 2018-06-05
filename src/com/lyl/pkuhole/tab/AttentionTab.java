@@ -16,7 +16,7 @@ import javax.swing.ScrollPaneConstants;
 import com.lyl.pkuhole.PKUHole;
 import com.lyl.pkuhole.model.AttentionManager;
 import com.lyl.pkuhole.model.Topic;
-import com.lyl.pkuhole.widgets.VerticalList;
+import com.lyl.pkuhole.widgets.JVerticalList;
 
 public class AttentionTab extends JPanel implements Observer {
 
@@ -25,7 +25,7 @@ public class AttentionTab extends JPanel implements Observer {
 	// Panel for header
 	private JPanel header;
 	// VerticalList for Topics
-	private VerticalList topicList;
+	private JVerticalList topicList;
 	private JScrollPane scrollPane;
 
 	public AttentionTab() {
@@ -39,7 +39,7 @@ public class AttentionTab extends JPanel implements Observer {
 	public void initComponent() {
 		refresh = new JButton("Ë¢ÐÂ");
 
-		topicList = new VerticalList();
+		topicList = new JVerticalList();
 		scrollPane = new JScrollPane(topicList);
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);

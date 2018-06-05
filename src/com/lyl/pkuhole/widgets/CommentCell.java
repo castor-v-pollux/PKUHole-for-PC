@@ -9,7 +9,7 @@ import javax.swing.border.TitledBorder;
 
 import com.lyl.pkuhole.model.Comment;
 
-public class CommentCell extends JTextArea implements VerticalList.ListItemListener {
+public class CommentCell extends JTextArea implements JVerticalList.ListItemListener {
 
 	private static final Font BorderTitleFont = new Font(Font.SANS_SERIF, Font.BOLD, 18);
 

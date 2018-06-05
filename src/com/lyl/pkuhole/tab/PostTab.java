@@ -32,6 +32,7 @@ import com.lyl.pkuhole.model.User;
 import com.lyl.pkuhole.network.Network;
 import com.lyl.pkuhole.utils.BASE64Utils;
 import com.lyl.pkuhole.utils.UIUtils;
+import com.lyl.pkuhole.widgets.JScrollablePanel;
 
 import io.reactivex.schedulers.Schedulers;
 
@@ -48,7 +49,7 @@ public class PostTab extends JPanel {
 	private JLabel imageHint, imageLabel;
 	private JPanel buttonPanel;
 
-	private JPanel content;
+	private JScrollablePanel content;
 
 	private BufferedImage image;
 	private BufferedImage imagePreview;
@@ -93,7 +94,7 @@ public class PostTab extends JPanel {
 		gb.setConstraints(removePic, gbc);
 		buttonPanel.add(removePic);
 
-		content = new JPanel();
+		content = new JScrollablePanel();
 	}
 
 	private void initLayout() {
@@ -132,7 +133,9 @@ public class PostTab extends JPanel {
 		gb.setConstraints(imageLabel, gbc);
 		content.add(imageLabel);
 		setLayout(new BorderLayout());
-		add(new JScrollPane(content), BorderLayout.CENTER);
+		JScrollPane scrollPane = new JScrollPane(content);
+		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		add(scrollPane, BorderLayout.CENTER);
 	}
 
 	private void initEvent() {

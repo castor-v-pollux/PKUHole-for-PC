@@ -17,7 +17,7 @@ import javax.swing.SwingConstants;
 import com.lyl.pkuhole.model.Topic;
 import com.lyl.pkuhole.network.Network;
 import com.lyl.pkuhole.utils.UIUtils;
-import com.lyl.pkuhole.widgets.VerticalList;
+import com.lyl.pkuhole.widgets.JVerticalList;
 
 import io.reactivex.schedulers.Schedulers;
 
@@ -34,7 +34,7 @@ public class HoleTab extends JPanel {
 	// Panel for header
 	private JPanel header;
 	// VerticalList for Topics
-	private VerticalList topicList;
+	private JVerticalList topicList;
 	private JScrollPane scrollPane;
 
 	private int pageNum;
@@ -69,7 +69,7 @@ public class HoleTab extends JPanel {
 		gb.setConstraints(right, gbc);
 		panel.add(right);
 
-		topicList = new VerticalList();
+		topicList = new JVerticalList();
 		scrollPane = new JScrollPane(topicList);
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -131,11 +131,11 @@ public class HoleTab extends JPanel {
 
 	private void loadPage(int pageNum) {
 		Network.getTopics(pageNum)
-		.observeOn(Schedulers.io())
+				.observeOn(Schedulers.io())
 				.subscribe(topics -> {
 					if (topics == null || topics.length == 0) {
 						UIUtils.messageBox("操作失败，该页面为空！");
-						// return false;
+						return;
 					}
 					topicList.removeAll();
 					for (Topic topic : topics) {

@@ -11,7 +11,7 @@ import com.lyl.pkuhole.gui.TopicWindow;
 import com.lyl.pkuhole.model.Topic;
 import com.lyl.pkuhole.model.TopicType;
 
-public class TopicCell extends JTextArea implements VerticalList.ListItemListener {
+public class TopicCell extends JTextArea implements JVerticalList.ListItemListener {
 
 	private static final Font BorderTitleFont = new Font(Font.SANS_SERIF, Font.BOLD, 20);
 

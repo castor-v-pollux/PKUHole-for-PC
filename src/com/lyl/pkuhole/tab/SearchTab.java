@@ -18,7 +18,7 @@ import org.apache.http.util.TextUtils;
 import com.lyl.pkuhole.model.Topic;
 import com.lyl.pkuhole.network.Network;
 import com.lyl.pkuhole.utils.UIUtils;
-import com.lyl.pkuhole.widgets.VerticalList;
+import com.lyl.pkuhole.widgets.JVerticalList;
 
 import io.reactivex.schedulers.Schedulers;
 
@@ -37,7 +37,7 @@ public class SearchTab extends JPanel {
 	// Panel for header
 	private JPanel header;
 	// VerticalList for Topics
-	private VerticalList topicList;
+	private JVerticalList topicList;
 	private JScrollPane scrollPane;
 
 	public SearchTab() {
@@ -52,7 +52,7 @@ public class SearchTab extends JPanel {
 		searchType = new JComboBox<String>(SearchTypeString);
 		search = new JButton("ËÑË÷");
 
-		topicList = new VerticalList();
+		topicList = new JVerticalList();
 		scrollPane = new JScrollPane(topicList);
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);

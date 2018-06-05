@@ -32,7 +32,7 @@ import javax.swing.SwingConstants;
  * VerticaList保持其中每个组件的引用，将组件实际添加到列表中，解决了问题1；
  * Scrollable实现中让getScrollableTracksViewportWidth返回true，解决了问题2。
  */
-public class VerticalList extends JPanel implements Scrollable {
+public class JVerticalList extends JPanel implements Scrollable {
 
 	private static final int PREFERRED_HEIGHT = 800;
 
@@ -47,7 +47,7 @@ public class VerticalList extends JPanel implements Scrollable {
 	private GridBagLayout gb;
 	private GridBagConstraints gbc;
 
-	public VerticalList() {
+	public JVerticalList() {
 		itemCount = 0;
 		selectedId = -1;
 		components = new ArrayList<JComponent>();
