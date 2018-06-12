@@ -109,18 +109,10 @@ public class HoleTab extends JPanel {
 	}
 
 	private void initEvent() {
-		refresh.addActionListener(e -> {
-			loadPage(pageNum);
-		});
-		left.addActionListener(e -> {
-			setPageNum(pageNum - 1);
-		});
-		right.addActionListener(e -> {
-			setPageNum(pageNum + 1);
-		});
-		go.addActionListener(e -> {
-			setPageNum((int) spinner.getValue());
-		});
+		refresh.addActionListener(e -> loadPage(pageNum));
+		left.addActionListener(e -> setPageNum(pageNum - 1));
+		right.addActionListener(e -> setPageNum(pageNum + 1));
+		go.addActionListener(e -> setPageNum((int) spinner.getValue()));
 	}
 
 	private void setPageNum(int newPageNum) {
